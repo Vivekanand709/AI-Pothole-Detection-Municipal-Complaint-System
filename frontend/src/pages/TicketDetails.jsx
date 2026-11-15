@@ -10,9 +10,6 @@ const TicketDetails = () => {
   const [updating, setUpdating] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [assignedTeam, setAssignedTeam] = useState('');
-  const [beforePhoto, setBeforePhoto] = useState(null);
-  const [afterPhoto, setAfterPhoto] = useState(null);
-  const [verificationNotes, setVerificationNotes] = useState('');
   const [verifications, setVerifications] = useState([]);
 
   useEffect(() => {
@@ -67,22 +64,6 @@ const TicketDetails = () => {
       await loadTicket();
     } catch (error) {
       console.error('Error resolving ticket:', error);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleSubmitVerification = async () => {
-    if (!beforePhoto || !afterPhoto) return;
-    try {
-      setUpdating(true);
-      await ticketService.submitVerification(id, beforePhoto, afterPhoto, verificationNotes);
-      setBeforePhoto(null);
-      setAfterPhoto(null);
-      setVerificationNotes('');
-      await loadTicket();
-    } catch (error) {
-      alert(error.response?.data?.detail || 'Could not submit repair evidence.');
     } finally {
       setUpdating(false);
     }
@@ -202,26 +183,30 @@ const TicketDetails = () => {
 
 
         <div className="mt-8 pt-6 border-t">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Before / After Repair Verification</h2>
-          <p className="text-sm text-gray-600 mb-4">Upload genuine photos from before and after the repair. Submitting both records the evidence and marks this ticket as resolved.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="block text-sm font-medium text-gray-700">Before repair photo
-              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setBeforePhoto(e.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
-            </label>
-            <label className="block text-sm font-medium text-gray-700">After repair photo
-              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setAfterPhoto(e.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
-            </label>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Repair Evidence</h2>
+              <p className="mt-1 text-sm text-gray-600">Keep before-and-after photos with the maintenance record.</p>
+            </div>
+            <button
+              onClick={() => navigate(`/tickets/${id}/verification`)}
+              disabled={updating || ticket.status === 'Resolved' || ticket.status === 'Closed'}
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Upload Before/After Photos
+            </button>
           </div>
-          <textarea value={verificationNotes} onChange={(e) => setVerificationNotes(e.target.value)} rows={2} maxLength={2000} placeholder="Repair notes (optional)" className="mt-4 w-full px-4 py-2 border border-gray-300 rounded-lg" />
-          <button onClick={handleSubmitVerification} disabled={updating || !beforePhoto || !afterPhoto} className="mt-3 px-5 py-2 bg-emerald-600 text-white rounded-lg disabled:opacity-50">Submit Repair Evidence</button>
-          {verifications.length > 0 && <div className="mt-6 space-y-3">
-            <h3 className="font-semibold text-gray-800">Submitted evidence</h3>
-            {verifications.map((item) => <div key={item.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-3">
-              <div><p className="text-sm font-medium mb-2">Before</p><img src={`http://localhost:8000${item.before_image_url}`} alt="Before repair" className="w-full h-48 object-cover rounded" /></div>
-              <div><p className="text-sm font-medium mb-2">After</p><img src={`http://localhost:8000${item.after_image_url}`} alt="After repair" className="w-full h-48 object-cover rounded" /></div>
-              {item.notes && <p className="md:col-span-2 text-sm text-gray-600">{item.notes}</p>}
-            </div>)}
-          </div>}
+          {verifications.length > 0 ? (
+            <div className="mt-5 space-y-4">
+              {verifications.map((item) => (
+                <div key={item.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-3">
+                  <div><p className="text-sm font-medium mb-2">Before</p><img src={`http://localhost:8000${item.before_image_url}`} alt="Before repair" className="w-full h-48 object-cover rounded" /></div>
+                  <div><p className="text-sm font-medium mb-2">After</p><img src={`http://localhost:8000${item.after_image_url}`} alt="After repair" className="w-full h-48 object-cover rounded" /></div>
+                  {item.notes && <p className="md:col-span-2 text-sm text-gray-600">{item.notes}</p>}
+                </div>
+              ))}
+            </div>
+          ) : <p className="mt-4 text-sm text-gray-500">No repair evidence submitted yet.</p>}
         </div>
 
         {/* Actions */}
