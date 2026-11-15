@@ -12,6 +12,7 @@ import TicketDetails from './pages/TicketDetails';
 import InspectionHistory from './pages/InspectionHistory';
 import Settings from './pages/Settings';
 import CitizenReport from './pages/CitizenReport';
+import CitizenReports from './pages/CitizenReports';
 import RepairVerification from './pages/RepairVerification';
 
 // Protected Route Component
@@ -72,6 +73,13 @@ function App() {
             <DashboardLayout>
               <Dashboard />
             </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/citizen-reports" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CitizenReports />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/map" element={
