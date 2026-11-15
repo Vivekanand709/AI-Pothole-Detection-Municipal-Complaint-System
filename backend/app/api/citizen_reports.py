@@ -115,7 +115,7 @@ def list_citizen_reports(
 def update_citizen_report_status(
     report_id: int,
     status: str = Query(...),
-    current_user=Depends(get_current_user_optional),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Update a complaint's municipal review status."""
