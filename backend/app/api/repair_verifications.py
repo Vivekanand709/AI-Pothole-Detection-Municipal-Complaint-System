@@ -12,7 +12,7 @@ from app.models.pothole import Pothole
 from app.models.repair_verification import RepairVerification
 from app.api.auth import get_current_user_optional
 
-repair_verifications_router = APIRouter(prefix="/api/tickets", tags=["Repair Verification"])
+verification_router = APIRouter(prefix="/api/tickets", tags=["Repair Verification"])
 UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "repair_verifications"
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 ALLOWED_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
@@ -37,7 +37,7 @@ async def save_image(upload: UploadFile, label: str) -> str:
     return f"/uploads/repair_verifications/{filename}"
 
 
-@repair_verifications_router.post("/{ticket_id}/verification", status_code=201)
+@verification_router.post("/{ticket_id}/verification", status_code=201)
 async def submit_repair_verification(
     ticket_id: int,
     before_photo: UploadFile = File(...),
@@ -86,7 +86,7 @@ async def submit_repair_verification(
         raise
 
 
-@repair_verifications_router.get("/{ticket_id}/verification")
+@verification_router.get("/{ticket_id}/verification")
 def get_repair_verification(ticket_id: int, db: Session = Depends(get_db)):
     """Return repair evidence for a maintenance ticket."""
     ticket = db.query(MaintenanceTicket).filter(MaintenanceTicket.id == ticket_id).first()
