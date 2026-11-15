@@ -69,7 +69,12 @@ class PotholeService:
         area: Optional[str] = None
     ) -> List[PotholeMapResponse]:
         """Get potholes formatted for map display."""
-        query = db.query(Pothole)
+        query = db.query(Pothole).filter(
+            Pothole.latitude.isnot(None),
+            Pothole.longitude.isnot(None),
+            Pothole.latitude != 0,
+            Pothole.longitude != 0
+        )
         
         if severity:
             query = query.filter(Pothole.severity == severity)
