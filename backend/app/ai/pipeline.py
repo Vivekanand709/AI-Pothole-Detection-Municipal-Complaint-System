@@ -80,13 +80,23 @@ class Pipeline:
             duration = video_info.get("duration", 0)
             
             # Step 3: Load GPS data if provided
+            gps_source = "uploaded_track"
             if gps_file_path and os.path.exists(gps_file_path):
                 self._update_progress(15, "Loading GPS data...")
-                self.gps_processor.load_gps_from_file(gps_file_path)
-            else:
-                # Generate demo GPS data
+                if not self.gps_processor.load_gps_from_file(gps_file_path):
+                    return {
+                        "success": False,
+                        "error": "GPS file could not be read. Expected CSV or JSON with timestamp, latitude and longitude.",
+                        "detections": []
+                    }
+            elif self.demo_mode:
                 self._update_progress(15, "Generating demo GPS data...")
                 self.gps_processor.generate_demo_gps(duration)
+                gps_source = "simulated_demo_track"
+            else:
+                # Real mode must never invent a moving GPS track.
+                self._update_progress(15, "No GPS track supplied; using configured fallback coordinates.")
+                gps_source = "configured_fallback"
             
             # Step 4: Extract frames
             self._update_progress(20, "Extracting frames...")
@@ -147,7 +157,8 @@ class Pipeline:
                         "ward": None,  # Will be set from inspection
                         "zone": None,  # Will be set from inspection
                         "detection_metadata": json.dumps(metadata),
-                        "demo_mode": detection.get("demo", False)
+                        "demo_mode": detection.get("demo", False),
+                        "gps_source": gps_source
                     }
                     
                     all_detections.append(pothole_data)
@@ -171,7 +182,8 @@ class Pipeline:
                 "tickets": tickets,
                 "video_info": video_info,
                 "total_detections": len(all_detections),
-                "demo_mode": self.demo_mode
+                "demo_mode": self.demo_mode,
+                "gps_source": gps_source
             }
             
         except Exception as e:
