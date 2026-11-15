@@ -17,6 +17,7 @@ const Sidebar = () => {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/citizen-report', label: 'Citizen Report Portal', icon: '📝' },
     { path: '/map', label: 'Live Road Map', icon: '�️' },
     { path: '/upload', label: 'Pothole Detection', icon: '�' },
     { path: '/inspections', label: 'Inspections', icon: '�' },
