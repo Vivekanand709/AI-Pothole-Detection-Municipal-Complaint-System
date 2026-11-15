@@ -3,13 +3,14 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.citizen_report import CitizenReport
 from app.schemas.citizen_report import CitizenReportResponse
+from app.api.auth import get_current_user_optional
 
 citizen_reports_router = APIRouter(prefix="/api/citizen-reports", tags=["Citizen Reports"])
 
@@ -92,3 +93,39 @@ def track_citizen_report(complaint_code: str, db: Session = Depends(get_db)):
         "area": report.area,
         "created_at": report.created_at,
     }
+
+
+
+@citizen_reports_router.get("", response_model=list[CitizenReportResponse])
+def list_citizen_reports(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = Query(None),
+    current_user=Depends(get_current_user_optional),
+    db: Session = Depends(get_db),
+):
+    """List citizen reports for municipal review."""
+    query = db.query(CitizenReport)
+    if status:
+        query = query.filter(CitizenReport.status == status)
+    return query.order_by(CitizenReport.created_at.desc()).offset(skip).limit(min(limit, 200)).all()
+
+
+@citizen_reports_router.patch("/{report_id}/status", response_model=CitizenReportResponse)
+def update_citizen_report_status(
+    report_id: int,
+    status: str = Query(...),
+    current_user=Depends(get_current_user_optional),
+    db: Session = Depends(get_db),
+):
+    """Update a complaint's municipal review status."""
+    allowed = {"Submitted", "Under Review", "Assigned", "Resolved", "Rejected"}
+    if status not in allowed:
+        raise HTTPException(status_code=400, detail=f"Status must be one of: {', '.join(sorted(allowed))}")
+    report = db.query(CitizenReport).filter(CitizenReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Citizen report not found.")
+    report.status = status
+    db.commit()
+    db.refresh(report)
+    return report
