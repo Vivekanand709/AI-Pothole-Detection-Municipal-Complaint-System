@@ -482,3 +482,17 @@ For issues or questions:
 ---
 
 **Important implementation note**: The default configuration uses simulated detections and approximate GPS. Real inference requires a compatible trained Ultralytics YOLO weights file at `backend/models/pothole_detector.pt` and `DEMO_MODE=false`. Real GPS requires a timestamped GPS CSV/JSON track; otherwise the application deliberately labels coordinates as demo estimates. Citizen complaints use real uploaded photos and optional browser GPS. Repair evidence uses the uploaded before/after photos. This repository is a project prototype and still needs local end-to-end testing, model validation, security review, and production deployment configuration.
+
+
+## Real AI inference setup
+
+The video pipeline supports Ultralytics YOLO inference when a **trained pothole model** is provided. The repository does not bundle model weights. A generic pretrained COCO model is not a substitute for pothole-trained weights.
+
+1. Install backend dependencies from `backend/requirements.txt`.
+2. Put your trained `pothole_detector.pt` file in `backend/models/`, or configure `AI_MODEL_PATH` in `backend/.env`.
+3. Copy `backend/.env.example` to `backend/.env`.
+4. Set `DEMO_MODE=false` only after the correct weights are present.
+5. Restart the backend and check `http://127.0.0.1:8000/api/inspections/ai/status`. It reports whether weights are available and whether real AI mode is configured.
+6. Upload a short road-inspection video and inspect the generated detections. Validate the model on representative local road footage before relying on its predictions.
+
+When real mode is selected, a missing or invalid weights file now raises a clear error instead of silently generating random demo boxes. Demo mode remains the safe default. GPS remains demo-generated unless a GPS track is supplied to the processing pipeline.
