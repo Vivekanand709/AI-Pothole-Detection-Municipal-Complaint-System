@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.citizen_report import CitizenReport
 from app.schemas.citizen_report import CitizenReportResponse
-from app.api.auth import get_current_user_optional
+from app.api.auth import get_current_user
 
 citizen_reports_router = APIRouter(prefix="/api/citizen-reports", tags=["Citizen Reports"])
 
@@ -101,7 +101,7 @@ def list_citizen_reports(
     skip: int = 0,
     limit: int = 100,
     status: Optional[str] = Query(None),
-    current_user=Depends(get_current_user_optional),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """List citizen reports for municipal review."""
