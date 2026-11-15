@@ -109,6 +109,30 @@ def process_inspection_background(
         InspectionService.update_status(db, inspection_id, "failed")
 
 
+
+@inspections_router.get("/ai/status")
+def get_ai_status():
+    """Report whether real YOLO inference can be started with the configured weights."""
+    model_path = Path(settings.AI_MODEL_PATH)
+    if not model_path.is_absolute():
+        model_path = Path(__file__).resolve().parents[2] / model_path
+    weights_available = model_path.is_file()
+    real_mode_ready = (not settings.DEMO_MODE) and weights_available
+    if settings.DEMO_MODE:
+        message = "Demo Mode is enabled. Video detections are simulated."
+    elif not weights_available:
+        message = "Real AI mode is selected, but YOLO weights are missing."
+    else:
+        message = "Real AI mode is configured. Model loading will be checked when an inspection starts."
+    return {
+        "demo_mode": settings.DEMO_MODE,
+        "real_ai_ready": real_mode_ready,
+        "weights_available": weights_available,
+        "model_path": str(model_path),
+        "confidence_threshold": settings.CONFIDENCE_THRESHOLD,
+        "message": message,
+    }
+
 @inspections_router.post("/upload", response_model=InspectionResponse)
 async def upload_inspection(
     background_tasks: BackgroundTasks,
