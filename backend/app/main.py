@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.config import settings
-from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router, citizen_reports_router
+from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router, citizen_reports_router, verification_router
 from app.models import User, Inspection, Pothole, MaintenanceTicket, CitizenReport
 
 # Create database tables
@@ -31,6 +31,7 @@ app.include_router(potholes_router)
 app.include_router(tickets_router)
 app.include_router(dashboard_router)
 app.include_router(citizen_reports_router)
+app.include_router(verification_router)
 
 # Serve citizen-uploaded report photos
 from fastapi.staticfiles import StaticFiles
