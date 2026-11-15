@@ -69,7 +69,7 @@ def process_inspection_background(
             InspectionService.update_progress(db, inspection_id, 100.0)
             return
         
-        for detection in detections:
+        for detection_index, detection in enumerate(detections):
             from app.schemas.pothole import PotholeCreate
             pothole_create = PotholeCreate(
                 inspection_id=inspection_id,
@@ -95,9 +95,8 @@ def process_inspection_background(
             
             # Create ticket for this pothole
             # Update ticket data with actual pothole ID
-            ticket_idx = detections.index(detection)
-            if ticket_idx < len(tickets_data):
-                ticket_dict = tickets_data[ticket_idx]
+            if detection_index < len(tickets_data):
+                ticket_dict = tickets_data[detection_index]
                 ticket_dict["pothole_id"] = pothole.id
                 TicketService.create_ticket_from_dict(db, ticket_dict)
         
