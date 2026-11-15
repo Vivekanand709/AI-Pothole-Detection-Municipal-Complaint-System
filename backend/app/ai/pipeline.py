@@ -18,7 +18,7 @@ class Pipeline:
         self,
         video_path: str,
         output_dir: str,
-        demo_mode: bool = True,
+        demo_mode: Optional[bool] = None,
         progress_callback: Optional[Callable] = None
     ):
         self.video_path = video_path
