@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.config import settings
-from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router, citizen_reports_router, repair_verifications_router
+from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router, citizen_reports_router, verification_router
 from app.models import User, Inspection, Pothole, MaintenanceTicket, CitizenReport
 
 # Create database tables
