@@ -23,7 +23,7 @@ class Pipeline:
     ):
         self.video_path = video_path
         self.output_dir = output_dir
-        self.demo_mode = demo_mode or settings.DEMO_MODE
+        self.demo_mode = settings.DEMO_MODE if demo_mode is None else demo_mode
         self.progress_callback = progress_callback
         
         # Initialize components
