@@ -1,11 +1,13 @@
-import sys
+import importlib.util
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from app.ai.severity_classifier import SeverityClassifier
+MODULE_PATH = ROOT / "app" / "ai" / "severity_classifier.py"
+SPEC = importlib.util.spec_from_file_location("severity_classifier", MODULE_PATH)
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+SeverityClassifier = MODULE.SeverityClassifier
 
 
 class SeverityClassifierTests(unittest.TestCase):
