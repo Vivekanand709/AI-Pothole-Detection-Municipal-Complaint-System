@@ -23,7 +23,7 @@ const Sidebar = () => {
     { path: '/upload', label: 'Pothole Detection', icon: '🎥' },
     { path: '/inspections', label: 'Inspections', icon: '📁' },
     { path: '/tickets', label: 'Maintenance Tickets', icon: '🎫' },
-    { path: '/potholes', label: 'Road Analytics', icon: '�' },
+    { path: '/potholes', label: 'Road Analytics', icon: '📈' },
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
