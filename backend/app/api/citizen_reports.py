@@ -1,12 +1,11 @@
-import os
-import uuid
 import io
+import uuid
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from sqlalchemy.orm import Session
 from PIL import Image, UnidentifiedImageError
+from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.citizen_report import CitizenReport
@@ -37,14 +36,14 @@ async def create_citizen_report(
     if photo.content_type not in ALLOWED_IMAGE_TYPES or extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Upload a JPG, PNG, or WEBP image.")
 
-    content = await photo.read(MAX_IMAGE_SIZE + 1)
-    if not content:
+    image_bytes = await photo.read(MAX_IMAGE_SIZE + 1)
+    if not image_bytes:
         raise HTTPException(status_code=400, detail="The uploaded image is empty.")
-    if len(content) > MAX_IMAGE_SIZE:
+    if len(image_bytes) > MAX_IMAGE_SIZE:
         raise HTTPException(status_code=413, detail="Image must be 8 MB or smaller.")
 
     try:
-        with Image.open(io.BytesIO(content)) as image:
+        with Image.open(io.BytesIO(image_bytes)) as image:
             image.verify()
     except (UnidentifiedImageError, OSError):
         raise HTTPException(status_code=400, detail="The uploaded file is not a valid image.")
@@ -52,11 +51,10 @@ async def create_citizen_report(
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     stored_name = f"{uuid.uuid4().hex}{extension}"
     destination = UPLOAD_DIR / stored_name
-    destination.write_bytes(content)
+    destination.write_bytes(image_bytes)
 
-    complaint_code = f"RGA-{uuid.uuid4().hex[:12].upper()}"
     report = CitizenReport(
-        complaint_code=complaint_code,
+        complaint_code=f"RGA-{uuid.uuid4().hex[:12].upper()}",
         citizen_name=citizen_name.strip(),
         phone=phone.strip(),
         description=description.strip(),
@@ -71,14 +69,7 @@ async def create_citizen_report(
         db.add(report)
         db.commit()
         db.refresh(report)
-        return {
-        "complaint_code": report.complaint_code,
-        "status": report.status,
-        "description": report.description,
-        "road_name": report.road_name,
-        "area": report.area,
-        "created_at": report.created_at,
-    }
+        return report
     except Exception:
         db.rollback()
         destination.unlink(missing_ok=True)
@@ -87,10 +78,17 @@ async def create_citizen_report(
 
 @citizen_reports_router.get("/track/{complaint_code}")
 def track_citizen_report(complaint_code: str, db: Session = Depends(get_db)):
-    """Allow citizens to check a complaint using its unique tracking code."""
+    """Return complaint progress without exposing the citizen's contact details."""
     report = db.query(CitizenReport).filter(
         CitizenReport.complaint_code == complaint_code.upper()
     ).first()
     if not report:
         raise HTTPException(status_code=404, detail="No complaint found with this tracking code.")
-    return report
+    return {
+        "complaint_code": report.complaint_code,
+        "status": report.status,
+        "description": report.description,
+        "road_name": report.road_name,
+        "area": report.area,
+        "created_at": report.created_at,
+    }
