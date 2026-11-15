@@ -1,10 +1,12 @@
 import os
 import uuid
+import io
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
+from PIL import Image, UnidentifiedImageError
 
 from app.database import get_db
 from app.models.citizen_report import CitizenReport
@@ -41,12 +43,18 @@ async def create_citizen_report(
     if len(content) > MAX_IMAGE_SIZE:
         raise HTTPException(status_code=413, detail="Image must be 8 MB or smaller.")
 
+    try:
+        with Image.open(io.BytesIO(content)) as image:
+            image.verify()
+    except (UnidentifiedImageError, OSError):
+        raise HTTPException(status_code=400, detail="The uploaded file is not a valid image.")
+
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     stored_name = f"{uuid.uuid4().hex}{extension}"
     destination = UPLOAD_DIR / stored_name
     destination.write_bytes(content)
 
-    complaint_code = f"RGA-{uuid.uuid4().hex[:8].upper()}"
+    complaint_code = f"RGA-{uuid.uuid4().hex[:12].upper()}"
     report = CitizenReport(
         complaint_code=complaint_code,
         citizen_name=citizen_name.strip(),
@@ -63,14 +71,21 @@ async def create_citizen_report(
         db.add(report)
         db.commit()
         db.refresh(report)
-        return report
+        return {
+        "complaint_code": report.complaint_code,
+        "status": report.status,
+        "description": report.description,
+        "road_name": report.road_name,
+        "area": report.area,
+        "created_at": report.created_at,
+    }
     except Exception:
         db.rollback()
         destination.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail="Could not save the report. Please try again.")
 
 
-@citizen_reports_router.get("/track/{complaint_code}", response_model=CitizenReportResponse)
+@citizen_reports_router.get("/track/{complaint_code}")
 def track_citizen_report(complaint_code: str, db: Session = Depends(get_db)):
     """Allow citizens to check a complaint using its unique tracking code."""
     report = db.query(CitizenReport).filter(
