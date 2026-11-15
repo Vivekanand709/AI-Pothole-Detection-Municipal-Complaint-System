@@ -38,6 +38,9 @@ from pathlib import Path
 citizen_uploads = Path(__file__).resolve().parents[1] / "uploads" / "citizen_reports"
 citizen_uploads.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads/citizen_reports", StaticFiles(directory=str(citizen_uploads)), name="citizen-report-uploads")
+repair_uploads = Path(__file__).resolve().parents[1] / "uploads" / "repair_verifications"
+repair_uploads.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads/repair_verifications", StaticFiles(directory=str(repair_uploads)), name="repair-verification-uploads")
 
 
 @app.get("/")
