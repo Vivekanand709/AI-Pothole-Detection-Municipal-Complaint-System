@@ -10,7 +10,7 @@ from app.database import get_db
 from app.models.maintenance_ticket import MaintenanceTicket
 from app.models.pothole import Pothole
 from app.models.repair_verification import RepairVerification
-from app.api.auth import get_current_user_optional
+from app.api.auth import get_current_user
 
 verification_router = APIRouter(prefix="/api/tickets", tags=["Repair Verification"])
 UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "repair_verifications"
@@ -43,7 +43,7 @@ async def submit_repair_verification(
     before_photo: UploadFile = File(...),
     after_photo: UploadFile = File(...),
     notes: Optional[str] = Form(None, max_length=2000),
-    current_user=Depends(get_current_user_optional),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Store before/after repair evidence and resolve the associated pothole ticket."""
