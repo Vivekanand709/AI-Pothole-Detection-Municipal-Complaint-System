@@ -1,6 +1,7 @@
 import os
 import uuid
 import shutil
+from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -135,9 +136,10 @@ async def upload_inspection(
     
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}{file_ext}"
-    upload_dir = "backend/uploads"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, unique_filename)
+    backend_dir = Path(__file__).resolve().parents[2]
+    upload_dir = backend_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    file_path = str(upload_dir / unique_filename)
     
     # Save file
     try:
@@ -170,7 +172,7 @@ async def upload_inspection(
     )
     
     # Start background processing (with duplicate protection in background task)
-    output_dir = os.path.join("backend/detections", str(inspection.id))
+    output_dir = str(backend_dir / "detections" / str(inspection.id))
     os.makedirs(output_dir, exist_ok=True)
     
     background_tasks.add_task(
@@ -227,7 +229,8 @@ def process_inspection(
         raise HTTPException(status_code=400, detail="Inspection is currently being processed. Please wait for completion.")
     
     # Start background processing
-    output_dir = os.path.join("backend/detections", str(inspection.id))
+    backend_dir = Path(__file__).resolve().parents[2]
+    output_dir = str(backend_dir / "detections" / str(inspection.id))
     os.makedirs(output_dir, exist_ok=True)
     
     background_tasks.add_task(
