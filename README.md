@@ -230,7 +230,8 @@ The system automatically creates demo users on first startup:
 - Enter contact details and the road issue description
 - Attach a JPG, PNG, or WEBP photo (maximum 8 MB)
 - Optionally capture the device GPS location (browser permission required)
-- Save the generated `RGA-XXXXXXXX` tracking code and use it to check report status
+- Save the generated `RGA-XXXXXXXXXXXX` tracking code and use it to check report status
+- Municipal staff can open **Manage Complaints** after signing in to review photos and update statuses
 
 ## 🗺️ GPS Data
 
