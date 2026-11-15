@@ -119,7 +119,7 @@ const CitizenReport = () => {
             <form onSubmit={trackComplaint} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
               <h2 className="mb-2 text-xl font-bold text-slate-900">Track your complaint</h2>
               <p className="mb-4 text-sm text-slate-600">Enter the tracking code you received after submission.</p>
-              <input required value={trackInput} onChange={(e) => setTrackInput(e.target.value)} placeholder="e.g. RGA-12AB34CD" className="w-full rounded-lg border border-slate-300 px-3 py-2" />
+              <input required value={trackInput} onChange={(e) => setTrackInput(e.target.value)} placeholder="e.g. RGA-12AB34CD56" className="w-full rounded-lg border border-slate-300 px-3 py-2" />
               <button disabled={busy} className="mt-3 w-full rounded-lg border border-blue-700 px-4 py-2 font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-50">Track Status</button>
             </form>
 
