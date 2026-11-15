@@ -496,3 +496,8 @@ The video pipeline supports Ultralytics YOLO inference when a **trained pothole 
 6. Upload a short road-inspection video and inspect the generated detections. Validate the model on representative local road footage before relying on its predictions.
 
 When real mode is selected, a missing or invalid weights file now raises a clear error instead of silently generating random demo boxes. Demo mode remains the safe default. GPS remains demo-generated unless a GPS track is supplied to the processing pipeline.
+
+
+## Train a genuine pothole detection model
+
+This repository does not include trained pothole weights. Follow [AI model training guide](docs/AI_MODEL_TRAINING.md) to obtain a properly licensed YOLO-format pothole dataset, train the detector with `scripts/train_pothole_model.py`, and enable real inference. Demo Mode is simulated and must not be presented as real AI output.
