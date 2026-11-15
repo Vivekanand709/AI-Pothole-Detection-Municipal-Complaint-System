@@ -24,6 +24,19 @@ The default configuration is demo mode. The system includes a demonstration work
 - Populates the dashboard with sample data
 - Clearly indicates demo mode in the UI
 
+
+## Citizen complaint workflow
+
+The public citizen portal is available at `/citizen-report`. A citizen can submit their name, contact number, road details, description, an image (JPG/PNG/WEBP up to 8 MB), and optionally share browser GPS coordinates. The API stores the image and complaint in the database and returns a unique tracking code.
+
+Municipal staff can sign in and open `/citizen-reports` to review reports, search by complaint code/road/area/description, filter by status, inspect the submitted photo, open supplied GPS coordinates in a map, and update the complaint status. Citizens can use their tracking code on the public portal to check progress.
+
+For maintenance tickets, authorised staff can open the ticket's repair-verification page, submit before-and-after photos with notes, and resolve the ticket through the verification API.
+
+### Demo limitations
+
+The default `DEMO_MODE` setting is `true`. In this mode, the video-inspection pipeline uses simulated detections and approximate demo coordinates rather than claiming live model inference or hardware GPS. Citizen GPS is only captured when the citizen explicitly grants browser permission. Run and validate the full workflow in your local environment before presenting it as a production municipal deployment.
+
 ## 🏗️ Architecture
 
 ### Technology Stack
