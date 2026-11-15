@@ -13,11 +13,13 @@ A comprehensive municipal road monitoring system that uses AI/computer vision to
 - **Interactive Map**: Leaflet-based map visualization with filtering
 - **Dashboard Analytics**: Comprehensive statistics and charts
 - **User Authentication**: Role-based access control (Admin, Municipal Officer, Inspector)
+- **Citizen Complaint Portal**: Public photo-based reporting, optional browser GPS, unique tracking code, and complaint status lookup
+- **Repair Evidence**: Before/after image submission on maintenance tickets; successful evidence submission records the repair and resolves the ticket
 
-### Demo Mode
-The system includes a fully functional demo mode that:
-- Uses simulated AI detections for demonstration
-- Generates approximate GPS coordinates
+### Demo Mode and real AI
+The default configuration is demo mode. The system includes a demonstration workflow that:
+- Uses simulated AI detections for demonstration (not model inference)
+- Generates approximate GPS coordinates when no GPS track is supplied
 - Creates realistic maintenance tickets
 - Populates the dashboard with sample data
 - Clearly indicates demo mode in the UI
@@ -220,7 +222,15 @@ The system automatically creates demo users on first startup:
 - Tickets are automatically created for each detected pothole
 - View ticket details and update status
 - Assign teams and add resolution notes
+- Upload before/after repair photos in Ticket Details to save evidence and mark the ticket resolved
 - Track ticket lifecycle: Open → Assigned → In Progress → Resolved → Closed
+
+### 7. Citizen Complaint Portal
+- Open `/citizen-report` without signing in
+- Enter contact details and the road issue description
+- Attach a JPG, PNG, or WEBP photo (maximum 8 MB)
+- Optionally capture the device GPS location (browser permission required)
+- Save the generated `RGA-XXXXXXXX` tracking code and use it to check report status
 
 ## 🗺️ GPS Data
 
@@ -251,7 +261,7 @@ timestamp,latitude,longitude
 
 ## 🤖 AI Model Setup
 
-### Demo Mode (Current)
+### Demo Mode (Default)
 
 The system currently runs in **Demo Mode** by default:
 - Simulates realistic pothole detections
@@ -427,16 +437,11 @@ Test the complete workflow:
 
 ## 🚀 Future Improvements
 
-- [ ] Integration with real GPS hardware
-- [ ] Support for real-time video streaming
+- [ ] Integration with real GPS hardware and synchronized GPS tracks during video uploads
+- [ ] Production-trained pothole model weights and field validation
 - [ ] Mobile app for field inspectors
-- [ ] Advanced analytics and reporting
-- [ ] Integration with municipal work order systems
-- [ ] Multi-language support
-- [ ] Real-time notifications
-- [ ] Historical trend analysis
-- [ ] Weather data integration
-- [ ] Citizen reporting portal
+- [ ] Real-time notifications and SMS updates for citizens
+- [ ] Municipal work-order integration and deployment hardening
 
 ## 📝 License
 
@@ -462,4 +467,4 @@ For issues or questions:
 
 ---
 
-**Note**: This system is currently in demo mode. All AI detections and GPS coordinates are simulated for demonstration purposes. For production use, integrate real AI models and GPS data sources.
+**Important implementation note**: The default configuration uses simulated detections and approximate GPS. Real inference requires a compatible trained Ultralytics YOLO weights file at `backend/models/pothole_detector.pt` and `DEMO_MODE=false`. Real GPS requires a timestamped GPS CSV/JSON track; otherwise the application deliberately labels coordinates as demo estimates. Citizen complaints use real uploaded photos and optional browser GPS. Repair evidence uses the uploaded before/after photos. This repository is a project prototype and still needs local end-to-end testing, model validation, security review, and production deployment configuration.
