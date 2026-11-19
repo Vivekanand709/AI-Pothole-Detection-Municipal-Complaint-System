@@ -25,6 +25,11 @@ class PotholeService:
             status=pothole_data.status,
             road_name=pothole_data.road_name,
             area=pothole_data.area,
+            state=pothole_data.state,
+            district=pothole_data.district,
+            city=pothole_data.city,
+            ward=pothole_data.ward,
+            zone=pothole_data.zone,
             detection_metadata=pothole_data.detection_metadata
         )
         db.add(db_pothole)
@@ -69,7 +74,12 @@ class PotholeService:
         area: Optional[str] = None
     ) -> List[PotholeMapResponse]:
         """Get potholes formatted for map display."""
-        query = db.query(Pothole)
+        query = db.query(Pothole).filter(
+            Pothole.latitude.isnot(None),
+            Pothole.longitude.isnot(None),
+            Pothole.latitude != 0,
+            Pothole.longitude != 0
+        )
         
         if severity:
             query = query.filter(Pothole.severity == severity)

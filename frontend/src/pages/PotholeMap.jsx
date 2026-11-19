@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { potholeService } from '../api/potholes';
 import L from 'leaflet';
 
@@ -122,7 +122,7 @@ const PotholeMap = () => {
         ) : (
           <div className="h-96 rounded-lg overflow-hidden">
             <MapContainer
-              center={[40.7128, -74.0060]}
+              center={[30.9, 75.85]}
               zoom={13}
               style={{ height: '100%', width: '100%' }}
             >
@@ -130,7 +130,7 @@ const PotholeMap = () => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
-              {potholes.map((pothole) => (
+              {potholes.filter((pothole) => Number.isFinite(pothole.latitude) && Number.isFinite(pothole.longitude) && pothole.latitude !== 0 && pothole.longitude !== 0).map((pothole) => (
                 <Marker
                   key={pothole.id}
                   position={[pothole.latitude, pothole.longitude]}

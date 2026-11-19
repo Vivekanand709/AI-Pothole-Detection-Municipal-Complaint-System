@@ -1,6 +1,7 @@
 import os
 import uuid
 import shutil
+from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -68,7 +69,7 @@ def process_inspection_background(
             InspectionService.update_progress(db, inspection_id, 100.0)
             return
         
-        for detection in detections:
+        for detection_index, detection in enumerate(detections):
             from app.schemas.pothole import PotholeCreate
             pothole_create = PotholeCreate(
                 inspection_id=inspection_id,
@@ -94,9 +95,8 @@ def process_inspection_background(
             
             # Create ticket for this pothole
             # Update ticket data with actual pothole ID
-            ticket_idx = detections.index(detection)
-            if ticket_idx < len(tickets_data):
-                ticket_dict = tickets_data[ticket_idx]
+            if detection_index < len(tickets_data):
+                ticket_dict = tickets_data[detection_index]
                 ticket_dict["pothole_id"] = pothole.id
                 TicketService.create_ticket_from_dict(db, ticket_dict)
         
@@ -108,6 +108,30 @@ def process_inspection_background(
         print(f"Error processing inspection: {e}")
         InspectionService.update_status(db, inspection_id, "failed")
 
+
+
+@inspections_router.get("/ai/status")
+def get_ai_status():
+    """Report whether real YOLO inference can be started with the configured weights."""
+    model_path = Path(settings.AI_MODEL_PATH)
+    if not model_path.is_absolute():
+        model_path = Path(__file__).resolve().parents[2] / model_path
+    weights_available = model_path.is_file()
+    real_mode_ready = (not settings.DEMO_MODE) and weights_available
+    if settings.DEMO_MODE:
+        message = "Demo Mode is enabled. Video detections are simulated."
+    elif not weights_available:
+        message = "Real AI mode is selected, but YOLO weights are missing."
+    else:
+        message = "Real AI mode is configured. Model loading will be checked when an inspection starts."
+    return {
+        "demo_mode": settings.DEMO_MODE,
+        "real_ai_ready": real_mode_ready,
+        "weights_available": weights_available,
+        "model_path": str(model_path),
+        "confidence_threshold": settings.CONFIDENCE_THRESHOLD,
+        "message": message,
+    }
 
 @inspections_router.post("/upload", response_model=InspectionResponse)
 async def upload_inspection(
@@ -135,9 +159,10 @@ async def upload_inspection(
     
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}{file_ext}"
-    upload_dir = "backend/uploads"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, unique_filename)
+    backend_dir = Path(__file__).resolve().parents[2]
+    upload_dir = backend_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    file_path = str(upload_dir / unique_filename)
     
     # Save file
     try:
@@ -170,7 +195,7 @@ async def upload_inspection(
     )
     
     # Start background processing (with duplicate protection in background task)
-    output_dir = os.path.join("backend/detections", str(inspection.id))
+    output_dir = str(backend_dir / "detections" / str(inspection.id))
     os.makedirs(output_dir, exist_ok=True)
     
     background_tasks.add_task(
@@ -227,7 +252,8 @@ def process_inspection(
         raise HTTPException(status_code=400, detail="Inspection is currently being processed. Please wait for completion.")
     
     # Start background processing
-    output_dir = os.path.join("backend/detections", str(inspection.id))
+    backend_dir = Path(__file__).resolve().parents[2]
+    output_dir = str(backend_dir / "detections" / str(inspection.id))
     os.makedirs(output_dir, exist_ok=True)
     
     background_tasks.add_task(

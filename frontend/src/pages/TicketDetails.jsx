@@ -10,6 +10,7 @@ const TicketDetails = () => {
   const [updating, setUpdating] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [assignedTeam, setAssignedTeam] = useState('');
+  const [verifications, setVerifications] = useState([]);
 
   useEffect(() => {
     loadTicket();
@@ -20,6 +21,8 @@ const TicketDetails = () => {
       setLoading(true);
       const data = await ticketService.getTicket(id);
       setTicket(data);
+      const evidence = await ticketService.getVerification(id).catch(() => []);
+      setVerifications(evidence);
       setResolutionNotes(data.resolution_notes || '');
       setAssignedTeam(data.assigned_team || '');
     } catch (error) {
@@ -176,6 +179,34 @@ const TicketDetails = () => {
               </div>
             )}
           </div>
+        </div>
+
+
+        <div className="mt-8 pt-6 border-t">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Repair Evidence</h2>
+              <p className="mt-1 text-sm text-gray-600">Keep before-and-after photos with the maintenance record.</p>
+            </div>
+            <button
+              onClick={() => navigate(`/tickets/${id}/verification`)}
+              disabled={updating || ticket.status === 'Resolved' || ticket.status === 'Closed'}
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Upload Before/After Photos
+            </button>
+          </div>
+          {verifications.length > 0 ? (
+            <div className="mt-5 space-y-4">
+              {verifications.map((item) => (
+                <div key={item.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-3">
+                  <div><p className="text-sm font-medium mb-2">Before</p><img src={`http://localhost:8000${item.before_image_url}`} alt="Before repair" className="w-full h-48 object-cover rounded" /></div>
+                  <div><p className="text-sm font-medium mb-2">After</p><img src={`http://localhost:8000${item.after_image_url}`} alt="After repair" className="w-full h-48 object-cover rounded" /></div>
+                  {item.notes && <p className="md:col-span-2 text-sm text-gray-600">{item.notes}</p>}
+                </div>
+              ))}
+            </div>
+          ) : <p className="mt-4 text-sm text-gray-500">No repair evidence submitted yet.</p>}
         </div>
 
         {/* Actions */}

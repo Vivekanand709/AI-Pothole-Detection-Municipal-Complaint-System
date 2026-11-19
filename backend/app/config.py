@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # AI Settings
     AI_MODEL_PATH: str = "models/pothole_detector.pt"
-    DEMO_MODE: bool = True
+    DEMO_MODE: bool = True  # Set false in backend/.env to require real YOLO inference
     CONFIDENCE_THRESHOLD: float = 0.5
     
     # GPS Settings (Punjab, India - Ludhiana coordinates for demo)

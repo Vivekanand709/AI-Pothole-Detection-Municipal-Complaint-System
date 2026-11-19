@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.config import settings
-from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router
-from app.models import User, Inspection, Pothole, MaintenanceTicket
+from app.api import auth_router, inspections_router, potholes_router, tickets_router, dashboard_router, citizen_reports_router, verification_router
+from app.models import User, Inspection, Pothole, MaintenanceTicket, CitizenReport
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -30,6 +30,18 @@ app.include_router(inspections_router)
 app.include_router(potholes_router)
 app.include_router(tickets_router)
 app.include_router(dashboard_router)
+app.include_router(citizen_reports_router)
+app.include_router(verification_router)
+
+# Serve citizen-uploaded report photos
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+citizen_uploads = Path(__file__).resolve().parents[1] / "uploads" / "citizen_reports"
+citizen_uploads.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads/citizen_reports", StaticFiles(directory=str(citizen_uploads)), name="citizen-report-uploads")
+repair_uploads = Path(__file__).resolve().parents[1] / "uploads" / "repair_verifications"
+repair_uploads.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads/repair_verifications", StaticFiles(directory=str(repair_uploads)), name="repair-verification-uploads")
 
 
 @app.get("/")

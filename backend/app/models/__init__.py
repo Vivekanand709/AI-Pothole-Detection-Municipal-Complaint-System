@@ -2,5 +2,7 @@ from app.models.user import User
 from app.models.inspection import Inspection
 from app.models.pothole import Pothole
 from app.models.maintenance_ticket import MaintenanceTicket
+from app.models.citizen_report import CitizenReport
+from app.models.repair_verification import RepairVerification
 
-__all__ = ["User", "Inspection", "Pothole", "MaintenanceTicket"]
+__all__ = ["User", "Inspection", "Pothole", "MaintenanceTicket", "CitizenReport", "RepairVerification"]

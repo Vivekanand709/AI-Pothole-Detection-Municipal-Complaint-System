@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,6 +12,11 @@ const apiClient = axios.create({
 
 // Add token to requests if available
 apiClient.interceptors.request.use((config) => {
+  // Let the browser/Axios set the multipart boundary for file uploads.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers?.delete) config.headers.delete('Content-Type');
+    else if (config.headers) delete config.headers['Content-Type'];
+  }
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

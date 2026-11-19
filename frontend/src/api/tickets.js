@@ -31,6 +31,20 @@ export const ticketService = {
     return response.data;
   },
 
+  submitVerification: async (id, beforePhoto, afterPhoto, notes) => {
+    const form = new FormData();
+    form.append('before_photo', beforePhoto);
+    form.append('after_photo', afterPhoto);
+    if (notes) form.append('notes', notes);
+    const response = await apiClient.post(`/api/tickets/${id}/verification`, form);
+    return response.data;
+  },
+
+  getVerification: async (id) => {
+    const response = await apiClient.get(`/api/tickets/${id}/verification`);
+    return response.data;
+  },
+
   deleteTicket: async (id) => {
     const response = await apiClient.delete(`/api/tickets/${id}`);
     return response.data;

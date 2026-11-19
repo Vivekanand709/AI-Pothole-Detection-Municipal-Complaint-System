@@ -11,6 +11,9 @@ import MaintenanceTickets from './pages/MaintenanceTickets';
 import TicketDetails from './pages/TicketDetails';
 import InspectionHistory from './pages/InspectionHistory';
 import Settings from './pages/Settings';
+import CitizenReport from './pages/CitizenReport';
+import CitizenReports from './pages/CitizenReports';
+import RepairVerification from './pages/RepairVerification';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -58,6 +61,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/citizen-report" element={<CitizenReport />} />
+        <Route path="/tickets/:id/verification" element={<ProtectedRoute><MainLayout><RepairVerification /></MainLayout></ProtectedRoute>} />
         <Route path="/" element={
           <ProtectedRoute>
             <Navigate to="/dashboard" />
@@ -68,6 +73,13 @@ function App() {
             <DashboardLayout>
               <Dashboard />
             </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/citizen-reports" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CitizenReports />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/map" element={
